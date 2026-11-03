@@ -44,6 +44,10 @@
         android:layout_margin="20dp"
         android:textSize="48sp"
         android:hint="@string/hint_edad"
+        android:inputType="number"
+        android:maxLength="2"
+        android:gravity="center"
+        android:importantForAutofill="no"
         android:id="@+id/age_input"
         />
 
