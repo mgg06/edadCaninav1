@@ -2,7 +2,7 @@
 
 ## Versión 1
 
-Estos son los resultados al reproducir el cálculo original con enteros de Java.
+Probé las siete entradas en la app original desde el emulador. En los cuatro cierres, Logcat mostró NumberFormatException en Integer.parseInt al pulsar Calcular en MainActivity.java, línea 32.
 
 | Entrada | Resultado |
 | --- | --- |
