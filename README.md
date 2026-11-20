@@ -191,3 +191,18 @@ Comprueba en GitHub que tu fork tiene ahora dos ramas: `main` y `v2-validacion`.
 - [ ] No quedan números mágicos en `MainActivity`.
 - [ ] `onCreate()` solo prepara la pantalla; la lógica está en `calcularEdad()`.
 - [ ] El trabajo está en la rama `v2-validacion`, no en `main`.
+
+
+## EdadCaninaMVC
+
+Esta versión está en la rama `v3-mvc` y parte de la v2 con validación. Su identificador es `es.davante.edadcanina.mvc`, por lo que se instala junto a la v2
+
+### Preguntas Piensa
+
+**Paso 1. ¿Ha aparecido una clase nueva?**
+
+Activar DataBinding prepara el proyecto, pero todavía no genera `ActivityMainBinding`. Para crear esa clase hace falta que `activity_main.xml` tenga la raíz `<layout>` y volver a compilar
+
+### Comprobaciones por paso
+
+Las pruebas de pantalla están en `app/src/androidTest` y se ejecutan en el emulador. Retiran los filtros de entrada solo durante la prueba de texto para comprobar la validación Java, manteniendo el teclado numérico de la aplicación

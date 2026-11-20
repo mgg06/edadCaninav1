@@ -9,13 +9,18 @@ android {
     }
 
     defaultConfig {
-        applicationId = "es.davante.edadcanina"
+        applicationId = "es.davante.edadcanina.mvc"
         minSdk = 24
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // Genera el enlace entre el XML y Java sin buscar las vistas a mano
+    buildFeatures {
+        dataBinding = true
     }
 
     buildTypes {
