@@ -206,3 +206,10 @@ Activar DataBinding prepara el proyecto, pero todavía no genera `ActivityMainBi
 ### Comprobaciones por paso
 
 Las pruebas de pantalla están en `app/src/androidTest` y se ejecutan en el emulador. Retiran los filtros de entrada solo durante la prueba de texto para comprobar la validación Java, manteniendo el teclado numérico de la aplicación
+
+
+**Paso 2. ¿Cuándo se detecta un id incorrecto?**
+
+Si escribo mal `binding.ageInput`, Java lo detecta al compilar porque ese campo no existe en `ActivityMainBinding`. Con `findViewById`, un nombre de recurso inexistente también falla al compilar, pero un id válido de otra pantalla puede devolver `null` en ejecución, y un tipo equivocado puede causar un error de conversión. El binding evita estas búsquedas y ofrece el tipo correcto para este layout
+
+La clase generada permite ver los campos `ageInput`, `resultText` y `btnCalc`. El nombre del archivo `activity_main.xml` se transforma en `ActivityMainBinding`, y los ids pasan a camelCase
