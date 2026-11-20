@@ -213,3 +213,14 @@ Las pruebas de pantalla están en `app/src/androidTest` y se ejecutan en el emul
 Si escribo mal `binding.ageInput`, Java lo detecta al compilar porque ese campo no existe en `ActivityMainBinding`. Con `findViewById`, un nombre de recurso inexistente también falla al compilar, pero un id válido de otra pantalla puede devolver `null` en ejecución, y un tipo equivocado puede causar un error de conversión. El binding evita estas búsquedas y ofrece el tipo correcto para este layout
 
 La clase generada permite ver los campos `ageInput`, `resultText` y `btnCalc`. El nombre del archivo `activity_main.xml` se transforma en `ActivityMainBinding`, y los ids pasan a camelCase
+
+
+**Paso 3. ¿Hay que tocar el modelo para traducir la app?**
+
+No. El modelo devuelve valores de `Validacion` y una edad numérica, sin mensajes ni recursos de Android. La vista obtiene los textos de `strings.xml`. Una traducción se añade en `res/values-en/strings.xml` sin modificar las reglas ni las pruebas del modelo
+
+### Reto elegido: casos raros
+
+He decidido aceptar `05` y `+5` como el entero 5, por lo que ambos dan 35 años humanos. El cero inicial y el signo positivo no cambian su valor. `Integer.parseInt` ya reconoce estos formatos, así que no hace falta añadir otra regla. Hay una prueba JUnit para cada uno. El teclado numérico sigue restringiendo la entrada habitual, y las pruebas llaman al modelo directamente para comprobar también datos que la interfaz puede filtrar
+
+Los espacios exteriores se eliminan al validar. Un decimal o un valor que no cabe en `int` devuelve `NO_NUMERO`. Un entero fuera de 1 a 30 devuelve `FUERA_RANGO` antes de multiplicarlo, de modo que no se produce desbordamiento
