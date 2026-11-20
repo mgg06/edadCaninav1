@@ -51,6 +51,32 @@ public class EdadCaninaPantallaTest {
         }
     }
 
+    @Test public void limpiarBorraEntradaResultadoYError() {
+        try (ActivityScenario<MainActivity> escenario = ActivityScenario.launch(MainActivity.class)) {
+            onView(withId(R.id.age_input)).perform(replaceText("6"), closeSoftKeyboard());
+            onView(withId(R.id.btn_calc)).perform(click());
+            onView(withId(R.id.btn_limpiar)).perform(click());
+            onView(withId(R.id.age_input)).check(matches(withText("")));
+            onView(withId(R.id.result_text)).check(matches(withEffectiveVisibility(Visibility.INVISIBLE)));
+            onView(withId(R.id.btn_calc)).perform(click());
+            onView(withId(R.id.btn_limpiar)).perform(click());
+            onView(withId(R.id.age_input)).check((vista, fallo) -> {
+                if (fallo != null) throw fallo;
+                assertNull(((EditText) vista).getError());
+            });
+        }
+    }
+
+    @Test public void antesDeGuardarEstadoSePierdeElResultadoAlRecrear() {
+        try (ActivityScenario<MainActivity> escenario = ActivityScenario.launch(MainActivity.class)) {
+            onView(withId(R.id.age_input)).perform(replaceText("6"), closeSoftKeyboard());
+            onView(withId(R.id.btn_calc)).perform(click());
+            escenario.recreate();
+            onView(withId(R.id.age_input)).check(matches(withText("")));
+            onView(withId(R.id.result_text)).check(matches(withEffectiveVisibility(Visibility.INVISIBLE)));
+        }
+    }
+
     private void comprobarCalculo(String texto, int resultado) {
         try (ActivityScenario<MainActivity> escenario = ActivityScenario.launch(MainActivity.class)) {
             onView(withId(R.id.age_input)).perform(replaceText(texto), closeSoftKeyboard());

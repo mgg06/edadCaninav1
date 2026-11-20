@@ -46,6 +46,13 @@ public class EdadCaninaModelo extends BaseObservable {
         notifyPropertyChanged(BR.validacion);
     }
 
+    public void limpiar() {
+        setEdadTexto("");
+        // Aunque ya estuviera vacío, puede quedar el error de haber pulsado Calcular
+        setEdadHumana(0);
+        setValidacion(Validacion.SIN_CALCULAR);
+    }
+
     public Validacion calcular() {
         String texto = edadTexto.trim();
         if (texto.isEmpty()) {

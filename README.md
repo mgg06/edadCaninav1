@@ -236,3 +236,13 @@ El resultado utiliza `INVISIBLE` porque reserva su espacio y mantiene los botone
 **Paso 5. ¿Por qué el adaptador está en vista?**
 
 Porque convierte un estado del modelo en un mensaje traducido, lo muestra con `setError` y gestiona el foco. Todo eso depende de Android y de cómo se presenta la pantalla. En el modelo solo debe estar la decisión de si el dato es válido. Al escribir otro texto, la validación pasa a `SIN_CALCULAR`, el adaptador recibe el cambio y quita el error sin pulsar Calcular
+
+
+**Paso 6. ¿Es buena señal que el controlador tenga pocas líneas?**
+
+Sí, porque solo recibe las acciones y llama a `calcular()` o `limpiar()`. Las reglas están en el modelo y los textos y errores se presentan desde la vista. Si el controlador tuviera que convertir números o acceder a un `EditText`, estaría mezclando responsabilidades
+
+Los dos botones comparten una fila horizontal con el mismo peso. La pantalla puede desplazarse al poner el móvil en horizontal, para que la imagen y los controles no dejen los botones fuera de alcance
+
+
+**Experimento previo al paso 7:** al recrear la Activity después de calcular 6, se pierden tanto el texto de entrada como el resultado. El modelo nuevo empieza vacío, y el enlace de datos lleva ese estado a la pantalla. La prueba del paso 6 deja comprobado este comportamiento antes de añadir el guardado
