@@ -224,3 +224,10 @@ No. El modelo devuelve valores de `Validacion` y una edad numérica, sin mensaje
 He decidido aceptar `05` y `+5` como el entero 5, por lo que ambos dan 35 años humanos. El cero inicial y el signo positivo no cambian su valor. `Integer.parseInt` ya reconoce estos formatos, así que no hace falta añadir otra regla. Hay una prueba JUnit para cada uno. El teclado numérico sigue restringiendo la entrada habitual, y las pruebas llaman al modelo directamente para comprobar también datos que la interfaz puede filtrar
 
 Los espacios exteriores se eliminan al validar. Un decimal o un valor que no cabe en `int` devuelve `NO_NUMERO`. Un entero fuera de 1 a 30 devuelve `FUERA_RANGO` antes de multiplicarlo, de modo que no se produce desbordamiento
+
+
+**Paso 4. ¿Dónde se corta el viaje de ida y vuelta?**
+
+Escribo una cifra y `@={modelo.edadTexto}` llama al setter. Si cambia el texto, el modelo lo guarda y avisa con `BR.edadTexto`. El binding actualiza las expresiones que dependen de esa propiedad. Si llega otra asignación del mismo texto, `nuevoTexto.equals(edadTexto)` hace que el setter salga sin avisar. Así no se repiten cambios innecesarios ni se invalida un resultado sin haber cambiado la entrada
+
+El resultado utiliza `INVISIBLE` porque reserva su espacio y mantiene los botones en su sitio. Con `GONE`, el hueco desaparece y los controles inferiores suben al ocultarlo. La edad se obtiene del modelo, el XML solo aplica el formato y decide su visibilidad

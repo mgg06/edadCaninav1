@@ -20,37 +20,28 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         modelo = new EdadCaninaModelo();
-        binding.btnCalc.setOnClickListener(vista -> calcularEdad());
+        binding.setModelo(modelo);
+        binding.btnCalc.setOnClickListener(vista -> mostrarError(modelo.calcular()));
     }
 
-    private void calcularEdad() {
-        modelo.setEdadTexto(binding.ageInput.getText().toString());
-        Validacion validacion = modelo.calcular();
-        // El modelo devuelve estados, y esta parte de la vista elige los recursos
+    private void mostrarError(Validacion validacion) {
+        // El resultado ya lo pinta el XML. El error pasa al adaptador en el siguiente paso
+        String mensaje = null;
         switch (validacion) {
-            case OK:
-                binding.ageInput.setError(null);
-                binding.resultText.setText(getString(R.string.tu_edad_format, modelo.getEdadHumana()));
-                break;
             case VACIO:
-                mostrarError(getString(R.string.error_vacio));
+                mensaje = getString(R.string.error_vacio);
                 break;
             case NO_NUMERO:
-                mostrarError(getString(R.string.error_no_numero));
+                mensaje = getString(R.string.error_no_numero);
                 break;
             case FUERA_RANGO:
-                mostrarError(getString(R.string.error_rango,
-                        EdadCaninaModelo.EDAD_MINIMA, EdadCaninaModelo.EDAD_MAXIMA));
+                mensaje = getString(R.string.error_rango,
+                        EdadCaninaModelo.EDAD_MINIMA, EdadCaninaModelo.EDAD_MAXIMA);
                 break;
             default:
                 break;
         }
-    }
-
-    private void mostrarError(String mensaje) {
         binding.ageInput.setError(mensaje);
-        binding.ageInput.requestFocus();
-        // Borro el resultado para que no se quede la edad del cálculo anterior
-        binding.resultText.setText("");
+        if (mensaje != null) binding.ageInput.requestFocus();
     }
 }

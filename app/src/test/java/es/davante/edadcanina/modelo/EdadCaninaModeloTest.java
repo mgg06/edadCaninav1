@@ -1,6 +1,10 @@
 package es.davante.edadcanina.modelo;
 
 import org.junit.Test;
+import androidx.databinding.Observable;
+import es.davante.edadcanina.BR;
+import java.util.ArrayList;
+import java.util.List;
 import static org.junit.Assert.*;
 
 /** Las reglas se pueden probar con JUnit sin iniciar Android */
@@ -44,6 +48,53 @@ public class EdadCaninaModeloTest {
         modelo.setEdadTexto(new String("6"));
         assertEquals(Validacion.OK, modelo.getValidacion());
         assertEquals(42, modelo.getEdadHumana());
+    }
+
+    @Test public void calcularAvisaDeEdadYValidacion() {
+        EdadCaninaModelo modelo = new EdadCaninaModelo();
+        modelo.setEdadTexto("6");
+        List<Integer> avisos = escuchar(modelo);
+        modelo.calcular();
+        assertEquals(java.util.Arrays.asList(BR.edadHumana, BR.validacion), avisos);
+    }
+
+    @Test public void repetirCalculoNoAvisaSiNadaCambia() {
+        EdadCaninaModelo modelo = new EdadCaninaModelo();
+        modelo.setEdadTexto("6");
+        modelo.calcular();
+        List<Integer> avisos = escuchar(modelo);
+        modelo.calcular();
+        modelo.setEdadTexto("6");
+        assertTrue(avisos.isEmpty());
+    }
+
+    @Test public void editarAvisaDeEntradaYCaducidad() {
+        EdadCaninaModelo modelo = new EdadCaninaModelo();
+        modelo.setEdadTexto("6");
+        modelo.calcular();
+        List<Integer> avisos = escuchar(modelo);
+        modelo.setEdadTexto("7");
+        assertTrue(avisos.contains(BR.edadTexto));
+        assertTrue(avisos.contains(BR.edadHumana));
+        assertTrue(avisos.contains(BR.validacion));
+        assertEquals(3, avisos.size());
+    }
+
+    @Test public void editarDespuesDeErrorLoDejaSinCalcular() {
+        EdadCaninaModelo modelo = new EdadCaninaModelo();
+        modelo.calcular();
+        modelo.setEdadTexto("6");
+        assertEquals(Validacion.SIN_CALCULAR, modelo.getValidacion());
+    }
+
+    private List<Integer> escuchar(EdadCaninaModelo modelo) {
+        List<Integer> avisos = new ArrayList<>();
+        modelo.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+            @Override public void onPropertyChanged(Observable origen, int propiedad) {
+                avisos.add(propiedad);
+            }
+        });
+        return avisos;
     }
 
     private void comprobar(String entrada, Validacion esperado, int edadEsperada) {

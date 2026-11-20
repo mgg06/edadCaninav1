@@ -1,7 +1,12 @@
 package es.davante.edadcanina.modelo;
 
+import androidx.databinding.BaseObservable;
+import androidx.databinding.Bindable;
+
+import es.davante.edadcanina.BR;
+
 /** Guarda la entrada y las reglas sin depender de una pantalla de Android */
-public class EdadCaninaModelo {
+public class EdadCaninaModelo extends BaseObservable {
     private static final int FACTOR_CANINO = 7;
     public static final int EDAD_MINIMA = 1;
     public static final int EDAD_MAXIMA = 30;
@@ -10,8 +15,11 @@ public class EdadCaninaModelo {
     private int edadHumana;
     private Validacion validacion = Validacion.SIN_CALCULAR;
 
+    @Bindable
     public String getEdadTexto() { return edadTexto; }
+    @Bindable
     public int getEdadHumana() { return edadHumana; }
+    @Bindable
     public Validacion getValidacion() { return validacion; }
 
     public void setEdadTexto(String nuevoTexto) {
@@ -19,6 +27,8 @@ public class EdadCaninaModelo {
         if (nuevoTexto == null) nuevoTexto = "";
         if (nuevoTexto.equals(edadTexto)) return;
         edadTexto = nuevoTexto;
+        // El if anterior corta el viaje de vuelta del enlace si el texto ya es igual
+        notifyPropertyChanged(BR.edadTexto);
         // Un resultado solo sirve para la entrada con la que se calculó
         setEdadHumana(0);
         setValidacion(Validacion.SIN_CALCULAR);
@@ -27,16 +37,17 @@ public class EdadCaninaModelo {
     private void setEdadHumana(int nuevaEdad) {
         if (nuevaEdad == edadHumana) return;
         edadHumana = nuevaEdad;
+        notifyPropertyChanged(BR.edadHumana);
     }
 
     private void setValidacion(Validacion nuevaValidacion) {
         if (nuevaValidacion == validacion) return;
         validacion = nuevaValidacion;
+        notifyPropertyChanged(BR.validacion);
     }
 
     public Validacion calcular() {
         String texto = edadTexto.trim();
-        setEdadHumana(0);
         if (texto.isEmpty()) {
             setValidacion(Validacion.VACIO);
             return validacion;

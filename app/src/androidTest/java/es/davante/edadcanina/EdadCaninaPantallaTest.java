@@ -29,6 +29,15 @@ public class EdadCaninaPantallaTest {
     @Test public void treintaYUnoMuestraError() { comprobarError("31", R.string.error_rango); }
     @Test public void textoMuestraErrorSinCerrar() { comprobarError("abc", R.string.error_no_numero); }
 
+    @Test public void editarOcultaElResultado() {
+        try (ActivityScenario<MainActivity> escenario = ActivityScenario.launch(MainActivity.class)) {
+            onView(withId(R.id.age_input)).perform(replaceText("6"), closeSoftKeyboard());
+            onView(withId(R.id.btn_calc)).perform(click());
+            onView(withId(R.id.age_input)).perform(replaceText("7"), closeSoftKeyboard());
+            onView(withId(R.id.result_text)).check(matches(withEffectiveVisibility(Visibility.INVISIBLE)));
+        }
+    }
+
     private void comprobarCalculo(String texto, int resultado) {
         try (ActivityScenario<MainActivity> escenario = ActivityScenario.launch(MainActivity.class)) {
             onView(withId(R.id.age_input)).perform(replaceText(texto), closeSoftKeyboard());
