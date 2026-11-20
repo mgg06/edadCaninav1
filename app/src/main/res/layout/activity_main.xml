@@ -58,6 +58,7 @@
         android:importantForAutofill="no"
         android:id="@+id/age_input"
         android:text="@={modelo.edadTexto}"
+        app:errorValidacion="@{modelo.validacion}"
         />
 
  <TextView

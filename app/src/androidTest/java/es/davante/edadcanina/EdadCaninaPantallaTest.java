@@ -13,6 +13,7 @@ import org.hamcrest.Matcher;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static org.junit.Assert.assertNull;
 import static androidx.test.espresso.Espresso.onView;
 import static androidx.test.espresso.action.ViewActions.*;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
@@ -34,6 +35,18 @@ public class EdadCaninaPantallaTest {
             onView(withId(R.id.age_input)).perform(replaceText("6"), closeSoftKeyboard());
             onView(withId(R.id.btn_calc)).perform(click());
             onView(withId(R.id.age_input)).perform(replaceText("7"), closeSoftKeyboard());
+            onView(withId(R.id.result_text)).check(matches(withEffectiveVisibility(Visibility.INVISIBLE)));
+        }
+    }
+
+    @Test public void editarQuitaElErrorSinPulsarCalcular() {
+        try (ActivityScenario<MainActivity> escenario = ActivityScenario.launch(MainActivity.class)) {
+            onView(withId(R.id.btn_calc)).perform(click());
+            onView(withId(R.id.age_input)).perform(replaceText("6"), closeSoftKeyboard());
+            onView(withId(R.id.age_input)).check((vista, fallo) -> {
+                if (fallo != null) throw fallo;
+                assertNull(((EditText) vista).getError());
+            });
             onView(withId(R.id.result_text)).check(matches(withEffectiveVisibility(Visibility.INVISIBLE)));
         }
     }

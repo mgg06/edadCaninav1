@@ -231,3 +231,8 @@ Los espacios exteriores se eliminan al validar. Un decimal o un valor que no cab
 Escribo una cifra y `@={modelo.edadTexto}` llama al setter. Si cambia el texto, el modelo lo guarda y avisa con `BR.edadTexto`. El binding actualiza las expresiones que dependen de esa propiedad. Si llega otra asignación del mismo texto, `nuevoTexto.equals(edadTexto)` hace que el setter salga sin avisar. Así no se repiten cambios innecesarios ni se invalida un resultado sin haber cambiado la entrada
 
 El resultado utiliza `INVISIBLE` porque reserva su espacio y mantiene los botones en su sitio. Con `GONE`, el hueco desaparece y los controles inferiores suben al ocultarlo. La edad se obtiene del modelo, el XML solo aplica el formato y decide su visibilidad
+
+
+**Paso 5. ¿Por qué el adaptador está en vista?**
+
+Porque convierte un estado del modelo en un mensaje traducido, lo muestra con `setError` y gestiona el foco. Todo eso depende de Android y de cómo se presenta la pantalla. En el modelo solo debe estar la decisión de si el dato es válido. Al escribir otro texto, la validación pasa a `SIN_CALCULAR`, el adaptador recibe el cambio y quita el error sin pulsar Calcular
