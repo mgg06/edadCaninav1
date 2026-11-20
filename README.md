@@ -1,3 +1,5 @@
+La versión de esta entrega se explica en [EdadCaninaMVC](#edadcaninamvc)
+
 # 🐶 EdadCanina · v1
 
 Aplicación Android (Java) que calcula la edad "humana" de un perro multiplicando su edad por 7.
@@ -192,57 +194,166 @@ Comprueba en GitHub que tu fork tiene ahora dos ramas: `main` y `v2-validacion`.
 - [ ] `onCreate()` solo prepara la pantalla; la lógica está en `calcularEdad()`.
 - [ ] El trabajo está en la rama `v2-validacion`, no en `main`.
 
-
 ## EdadCaninaMVC
 
-Esta versión está en la rama `v3-mvc` y parte de la v2 con validación. Su identificador es `es.davante.edadcanina.mvc`, por lo que se instala junto a la v2
+Versión de la actividad de DataBinding y MVC, en la rama `v3-mvc`, a partir de `v2-validacion`. Mantiene la conversión y la validación de la v2 y añade el botón Limpiar
 
-### Preguntas Piensa
+El `applicationId` es `es.davante.edadcanina.mvc`, distinto del de la v2. El `namespace` sigue siendo `es.davante.edadcanina`, que es el paquete de las clases Java y de las clases generadas `R` y `BR`
 
-**Paso 1. ¿Ha aparecido una clase nueva?**
+### Organización y funcionamiento
 
-Activar DataBinding prepara el proyecto, pero todavía no genera `ActivityMainBinding`. Para crear esa clase hace falta que `activity_main.xml` tenga la raíz `<layout>` y volver a compilar
+| Pieza | Archivo o paquete | Responsabilidad |
+|---|---|---|
+| Modelo | `modelo/EdadCaninaModelo.java` y `modelo/Validacion.java` | Guarda la entrada, valida, calcula y avisa de los cambios |
+| Vista | `res/layout/activity_main.xml` y `vista/AdaptadoresVista.java` | Muestra datos y errores, recoge la entrada y envía los clics |
+| Controlador | `controlador/EdadCaninaControlador.java` | Da al modelo las órdenes de calcular y limpiar |
+| Activity | `MainActivity.java` | Crea y conecta las piezas, guarda y reconstruye el estado |
 
-### Comprobaciones por paso
+La edad válida está entre 1 y 30. El modelo elimina los espacios exteriores y distingue vacío, texto que no es un entero y edad fuera de rango. Un valor que no cabe en `int` se controla con `NumberFormatException`. La multiplicación solo se realiza después de validar el rango, así que el resultado máximo es 210
 
-Las pruebas de pantalla están en `app/src/androidTest` y se ejecutan en el emulador. Retiran los filtros de entrada solo durante la prueba de texto para comprobar la validación Java, manteniendo el teclado numérico de la aplicación
+Al editar la entrada, el resultado anterior caduca y se borra el error. Los setters de edad humana y validación son privados. Cada setter comprueba si el valor ha cambiado antes de avisar. Limpiar deja la entrada vacía, la edad humana a cero y la validación en `SIN_CALCULAR`, incluso si ya había un error de campo vacío
 
-
-**Paso 2. ¿Cuándo se detecta un id incorrecto?**
-
-Si escribo mal `binding.ageInput`, Java lo detecta al compilar porque ese campo no existe en `ActivityMainBinding`. Con `findViewById`, un nombre de recurso inexistente también falla al compilar, pero un id válido de otra pantalla puede devolver `null` en ejecución, y un tipo equivocado puede causar un error de conversión. El binding evita estas búsquedas y ofrece el tipo correcto para este layout
-
-La clase generada permite ver los campos `ageInput`, `resultText` y `btnCalc`. El nombre del archivo `activity_main.xml` se transforma en `ActivityMainBinding`, y los ids pasan a camelCase
-
-
-**Paso 3. ¿Hay que tocar el modelo para traducir la app?**
-
-No. El modelo devuelve valores de `Validacion` y una edad numérica, sin mensajes ni recursos de Android. La vista obtiene los textos de `strings.xml`. Una traducción se añade en `res/values-en/strings.xml` sin modificar las reglas ni las pruebas del modelo
+Los botones están uno al lado del otro y comparten el ancho con `layout_weight`. El contenido puede desplazarse cuando la pantalla está en horizontal para que los controles sigan accesibles. Los mensajes están en `strings.xml`, con parámetros de formato, y no en el modelo
 
 ### Reto elegido: casos raros
 
-He decidido aceptar `05` y `+5` como el entero 5, por lo que ambos dan 35 años humanos. El cero inicial y el signo positivo no cambian su valor. `Integer.parseInt` ya reconoce estos formatos, así que no hace falta añadir otra regla. Hay una prueba JUnit para cada uno. El teclado numérico sigue restringiendo la entrada habitual, y las pruebas llaman al modelo directamente para comprobar también datos que la interfaz puede filtrar
+He decidido aceptar `05` y `+5` como el entero 5. Ambos producen 35 años humanos porque el cero inicial y el signo positivo no cambian el valor. `Integer.parseInt` ya reconoce los dos formatos, así que no hace falta añadir otra conversión
 
-Los espacios exteriores se eliminan al validar. Un decimal o un valor que no cabe en `int` devuelve `NO_NUMERO`. Un entero fuera de 1 a 30 devuelve `FUERA_RANGO` antes de multiplicarlo, de modo que no se produce desbordamiento
+Las pruebas `ceroInicialEsValido` y `signoPositivoEsValido` comprueban esta decisión directamente en el modelo. El campo conserva el teclado numérico y el límite de dos caracteres de la v2. Estas restricciones ayudan a introducir datos, pero no sustituyen a la validación Java
 
+### Preguntas Piensa
 
-**Paso 4. ¿Dónde se corta el viaje de ida y vuelta?**
+**Paso 1. ¿Ha aparecido ya alguna clase nueva? ¿Por qué?**
 
-Escribo una cifra y `@={modelo.edadTexto}` llama al setter. Si cambia el texto, el modelo lo guarda y avisa con `BR.edadTexto`. El binding actualiza las expresiones que dependen de esa propiedad. Si llega otra asignación del mismo texto, `nuevoTexto.equals(edadTexto)` hace que el setter salga sin avisar. Así no se repiten cambios innecesarios ni se invalida un resultado sin haber cambiado la entrada
+Activar DataBinding prepara el proyecto, pero todavía no crea `ActivityMainBinding`. Hace falta que el XML tenga la raíz `<layout>` y volver a compilar para generar el enlace de esa pantalla
 
-El resultado utiliza `INVISIBLE` porque reserva su espacio y mantiene los botones en su sitio. Con `GONE`, el hueco desaparece y los controles inferiores suben al ocultarlo. La edad se obtiene del modelo, el XML solo aplica el formato y decide su visibilidad
+**Paso 2. Si escribo mal un id, ¿cuándo me entero con binding y con `findViewById`?**
 
+Si escribo mal `binding.ageInput`, Java detecta al compilar que ese campo no existe. Con `findViewById`, un nombre de recurso inexistente también falla al compilar, pero un id válido de otra pantalla puede devolver `null` en ejecución. Un tipo incorrecto puede provocar una conversión inválida. El binding evita esas búsquedas y proporciona las vistas con sus tipos
 
-**Paso 5. ¿Por qué el adaptador está en vista?**
+La clase generada se ha revisado después de compilar. `activity_main.xml` produce `ActivityMainBinding`, y `age_input` se convierte en el campo `ageInput`. También aparecen los campos de los botones y del resultado, y un setter por cada variable del bloque `<data>`
 
-Porque convierte un estado del modelo en un mensaje traducido, lo muestra con `setError` y gestiona el foco. Todo eso depende de Android y de cómo se presenta la pantalla. En el modelo solo debe estar la decisión de si el dato es válido. Al escribir otro texto, la validación pasa a `SIN_CALCULAR`, el adaptador recibe el cambio y quita el error sin pulsar Calcular
+**Paso 3. Si la app pasa a inglés, ¿hay que tocar el modelo?**
 
+No. El modelo devuelve una edad numérica y un valor de `Validacion`, sin textos para el usuario ni recursos de Android. La traducción se añade en `res/values-en/strings.xml`. La vista obtiene los mensajes de los recursos, por lo que las reglas y sus pruebas no cambian
+
+**Paso 4. ¿Dónde se corta la cadena del enlace bidireccional?**
+
+Al escribir una cifra, el enlace llama a `setEdadTexto`. Si el texto cambia, el modelo lo guarda, invalida el resultado y avisa. El binding recibe el aviso y actualiza las expresiones que dependen de ese dato. Si vuelve a llegar el mismo texto, el `if` de igualdad termina el setter sin emitir otro aviso ni invalidar otra vez el resultado
+
+```mermaid
+flowchart TD
+    A[Escribo una cifra] --> B[El enlace llama a setEdadTexto]
+    B --> C{¿El texto es igual al anterior?}
+    C -->|Sí| D[Termina sin avisar]
+    C -->|No| E[Guarda el texto y caduca el resultado]
+    E --> F[Notifica las propiedades cambiadas]
+    F --> G[El binding actualiza la vista]
+    G --> B
+```
+
+El resultado utiliza `INVISIBLE` para conservar su hueco y mantener los botones en su sitio. Con `GONE`, el espacio se elimina y los controles inferiores suben. El XML aplica el formato del recurso y decide la visibilidad, pero no multiplica ni valida edades
+
+**Paso 5. ¿Por qué el adaptador está en vista y no en modelo?**
+
+Porque traduce un estado a un mensaje localizado, llama a `setError` y gestiona el foco del campo. Son decisiones de presentación que dependen de Android. El modelo solo decide si el dato es válido. Al cambiar la entrada, el estado pasa a `SIN_CALCULAR`, el binding llama al adaptador y este quita el error con `null`
 
 **Paso 6. ¿Es buena señal que el controlador tenga pocas líneas?**
 
-Sí, porque solo recibe las acciones y llama a `calcular()` o `limpiar()`. Las reglas están en el modelo y los textos y errores se presentan desde la vista. Si el controlador tuviera que convertir números o acceder a un `EditText`, estaría mezclando responsabilidades
+Sí. Cada método representa una acción y da una orden al modelo. No necesita leer vistas, convertir números ni elegir mensajes. Si empezara a validar edades o a modificar un `EditText`, estaría haciendo trabajo del modelo o de la vista
 
-Los dos botones comparten una fila horizontal con el mismo peso. La pantalla puede desplazarse al poner el móvil en horizontal, para que la imagen y los controles no dejen los botones fuera de alcance
+**Paso 7. ¿Dónde podría vivir el modelo para no morir al girar?**
 
+En un `ViewModel` asociado a la Activity, que sobrevive a los cambios de configuración. En esta actividad se mantiene MVC, por lo que el modelo se reconstruye desde `onSaveInstanceState`. Un `ViewModel` por sí solo tampoco conserva datos si el proceso desaparece, para ese caso se necesita un mecanismo de estado guardado o almacenamiento
 
-**Experimento previo al paso 7:** al recrear la Activity después de calcular 6, se pierden tanto el texto de entrada como el resultado. El modelo nuevo empieza vacío, y el enlace de datos lleva ese estado a la pantalla. La prueba del paso 6 deja comprobado este comportamiento antes de añadir el guardado
+### Experimento y conservación del estado
+
+En la versión etiquetada `paso-6`, sin guardado de estado, se calculó la edad para 6 y se comprobó que al recrear la Activity se perdían tanto el texto de entrada como el resultado, porque el modelo nuevo estaba vacío. La prueba de recreación está en esa etiqueta. El giro a horizontal se comprobó también sobre esa versión y produjo la misma pérdida
+
+El paso 7 guarda solo el texto y un booleano que indica si se había intentado calcular. No guarda ni la edad calculada ni mensajes ni el enum completo. Al reconstruir, restaura el texto y repite `calcular()` solo si hubo un intento previo. Así recupera un resultado o un error y conserva también una entrada pendiente sin calcularla por su cuenta
+
+Las claves del `Bundle` son constantes y la restauración se hace antes de entregar el modelo al binding. Las pruebas finales comprueban recreación, giro a horizontal y cambio entre modo oscuro y claro
+
+### Explícalo con tus palabras
+
+**1. ¿Qué diferencia hay entre `@{...}` y `@={...}`?**
+
+`@{...}` permite que la vista lea del modelo. Lo uso para el texto del resultado, su visibilidad y el error. `@={...}` enlaza en los dos sentidos. Además de mostrar el texto del modelo, envía al modelo lo que escribo en el campo. Por eso la entrada puede actualizarse sin leer `getText()` desde la Activity
+
+**2. ¿Qué ocurre desde que pulso Calcular hasta que aparece 42?**
+
+Primero escribo 6 y el enlace bidireccional lo lleva a `setEdadTexto`. Al pulsar Calcular, la lambda del XML llama a `onCalcularClick` del controlador. Este pide `calcular()` al modelo. El modelo comprueba que no esté vacío, convierte el entero, valida que esté entre 1 y 30 y lo multiplica por `FACTOR_CANINO`
+
+La edad humana pasa a 42 y la validación a `OK`. Los setters avisan con `BR.edadHumana` y `BR.validacion` cuando esos valores cambian. DataBinding actualiza el texto con `tu_edad_format`, hace visible el resultado y el adaptador quita cualquier error. La Activity no escribe el resultado ni atiende el clic
+
+**3. ¿Qué cambiaría para que el factor fuera 6 en vez de 7 y por qué solo toco un fichero?**
+
+Cambiaría `FACTOR_CANINO` de 7 a 6 en `EdadCaninaModelo.java`. La operación solo está definida allí. La vista recibe el resultado y el controlador da la orden, de modo que no necesitan conocer el factor. Al hacer ese cambio habría que actualizar también las expectativas numéricas de las pruebas, porque 6 pasaría a producir 36. El único fichero de producción que cambia es el modelo
+
+### Pruebas y ejecución
+
+Desde la raíz del proyecto, con el JDK de Android Studio y un emulador iniciado:
+
+```powershell
+.\gradlew.bat :app:assembleDebug :app:testDebugUnitTest :app:connectedDebugAndroidTest :app:lintDebug
+.\gradlew.bat :app:installDebug
+```
+
+Las pruebas JUnit están en `app/src/test`. Hay 23 del modelo y 5 del controlador, además de la prueba de ejemplo que ya tenía el proyecto. Cubren valores correctos, límites, errores, espacios, desbordamiento de entrada, caducidad, avisos de propiedades y limpieza
+
+Las pruebas de Android están en `app/src/androidTest`. Comprueban la pantalla con Espresso. Para probar `abc`, retiran los filtros únicamente durante esa prueba, sin cambiar las restricciones del layout de la app
+
+| Comprobación | Resultado esperado |
+|---|---|
+| `6`, `1` y `30` | 42, 7 y 210 años humanos |
+| Vacío, `abc`, `0` y `31` | Mensaje correspondiente sin cierre de la app |
+| Editar después de calcular | El resultado queda invisible |
+| Editar después de un error | El error desaparece sin pulsar Calcular |
+| Limpiar tras resultado o error | Entrada vacía, sin resultado y sin error |
+| Recrear tras calcular o fallar | Conserva resultado o error |
+| Recrear con una entrada pendiente | Conserva el texto sin calcularlo |
+| Girar a horizontal | Conserva resultado o error y permite acceder a los botones |
+| Cambiar entre modo oscuro y claro | Conserva resultado o error |
+
+Verificación final en el emulador Pixel 7 con Android 17: compilación correcta, 29 pruebas JUnit y 20 pruebas de Android en verde, sin fallos ni pruebas omitidas
+
+| Paso | Pruebas JUnit aprobadas | Pruebas de Android aprobadas |
+|---|---:|---:|
+| 1 | 1 | 8 |
+| 2 | 1 | 8 |
+| 3 | 20 | 8 |
+| 4 | 24 | 9 |
+| 5 | 24 | 10 |
+| 6 | 29 | 12 |
+| 7 | 29 | 20 |
+
+La compilación Java no muestra avisos. Lint termina con 0 errores y 1 aviso que recomienda actualizar el complemento de Android para Gradle de 9.4.1 a 9.5.1. Se mantiene la versión que ya utiliza el proyecto para no añadir una actualización de herramientas a la actividad. Durante las pruebas, el JDK también muestra un aviso de obsolescencia de una dependencia Protobuf del ejecutor de Android, sin impedir su ejecución
+
+### Autoevaluación
+
+- [x] La app calcula y valida vacío, texto, 0 y 31 sin cerrarse en las pruebas
+- [x] MainActivity solo conecta las piezas y guarda o reconstruye el estado
+- [x] No hay `findViewById`, `setText`, `setError` ni `setOnClickListener` en MainActivity
+- [x] El modelo no importa `android.*` ni contiene textos para el usuario
+- [x] El modelo usa `BaseObservable`, tres getters `@Bindable` y avisos solo cuando cambia el valor
+- [x] Los setters de resultado y validación son privados, y editar invalida el cálculo anterior
+- [x] La entrada usa `@={}`, el resultado usa `@{}` y los errores pasan por un adaptador propio de vista
+- [x] El controlador solo conserva el modelo, sin referencias a vistas
+- [x] Calcular y Limpiar se enlazan con lambdas en el XML
+- [x] El resultado y los errores sobreviven a los cambios de configuración comprobados
+- [x] Hay más de cinco pruebas JUnit en verde, incluidas las del controlador
+- [x] Los comentarios explican las decisiones y el motivo de las comprobaciones
+- [x] Se ha realizado el reto de casos raros y se han respondido las preguntas de la guía
+- [x] Cada paso tiene su commit y etiqueta `paso-1` a `paso-7`
+
+### Historial y entrega
+
+Los siete commits usan el prefijo `Paso N:` y las etiquetas están en minúsculas. Cada paso se ha compilado y probado antes de guardarlo. Las fechas corresponden al momento real de los commits
+
+```powershell
+git log --oneline --decorate v2-validacion..v3-mvc
+git tag --list "paso-*"
+git push -u origin v3-mvc --tags
+```
+
+[Ver la rama de entrega v3-mvc](https://github.com/mgg06/edadCaninav1/tree/v3-mvc)
